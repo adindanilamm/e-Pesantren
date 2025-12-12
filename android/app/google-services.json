@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "952217268448",
+    "project_id": "e-pesantrensantri",
+    "storage_bucket": "e-pesantrensantri.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:952217268448:android:dfc6fd8b674b8f82b76085",
+        "android_client_info": {
+          "package_name": "com.pesantren.e_penilaian_santri"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCI5tEczFDSf4UsZ0mi8iYASttdMGsdRrk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
