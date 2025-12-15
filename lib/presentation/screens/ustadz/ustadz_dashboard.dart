@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../providers/auth_provider.dart';
 import 'santri_list_screen.dart';
 import 'ustadz_profile_screen.dart';
@@ -108,54 +109,57 @@ class UstadzDashboard extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildSummaryItem(
-                                'Total Kelas',
-                                '3',
-                                const Color(0xFF2563EB),
-                              ),
-                            ),
-                            Container(
-                              width: 1,
-                              height: 40,
-                              color: const Color(0xFFE2E8F0),
-                            ),
-                            Expanded(
-                              child: _buildSummaryItem(
-                                'Total Santri',
-                                '85',
-                                const Color(0xFF10B981),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        const Divider(height: 1),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildSummaryItem(
-                                'Jam Mengajar',
-                                '09:00-15:00',
-                                const Color(0xFF8B5CF6),
-                              ),
-                            ),
-                            Container(
-                              width: 1,
-                              height: 40,
-                              color: const Color(0xFFE2E8F0),
-                            ),
-                            Expanded(
-                              child: _buildSummaryItem(
-                                'Tugas Pending',
-                                '30',
-                                const Color(0xFFF59E0B),
-                              ),
-                            ),
-                          ],
+                        // Dynamic stats using StreamBuilder for santri count
+                        StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('santri')
+                              .snapshots(),
+                          builder: (context, santriSnapshot) {
+                            final santriCount = santriSnapshot.hasData
+                                ? santriSnapshot.data!.docs.length.toString()
+                                : '-';
+                            final subjectCount =
+                                (userAsync.value?.mataPelajaran?.length ?? 0)
+                                    .toString();
+                            final jamMengajar =
+                                userAsync.value?.jamMengajar ?? '-';
+
+                            return Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildSummaryItem(
+                                        'Total Kelas',
+                                        subjectCount,
+                                        const Color(0xFF2563EB),
+                                      ),
+                                    ),
+                                    Container(
+                                      width: 1,
+                                      height: 40,
+                                      color: const Color(0xFFE2E8F0),
+                                    ),
+                                    Expanded(
+                                      child: _buildSummaryItem(
+                                        'Total Santri',
+                                        santriCount,
+                                        const Color(0xFF10B981),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                const Divider(height: 1),
+                                const SizedBox(height: 12),
+                                _buildSummaryItem(
+                                  'Jam Mengajar',
+                                  jamMengajar,
+                                  const Color(0xFF8B5CF6),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),

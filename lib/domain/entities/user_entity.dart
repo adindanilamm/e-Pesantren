@@ -10,6 +10,7 @@ class UserEntity extends Equatable {
   // Additional fields for Ustadz
   final String? kelasWali; // Class they are wali kelas for
   final List<String>? mataPelajaran; // Array of subject IDs they teach
+  final String? jamMengajar; // Teaching hours (e.g., "09:00-15:00")
 
   // Additional fields for Wali Santri
   final List<String>? santriIds; // Array of santri IDs they are guardian for
@@ -25,6 +26,7 @@ class UserEntity extends Equatable {
     this.photoUrl,
     this.kelasWali,
     this.mataPelajaran,
+    this.jamMengajar,
     this.santriIds,
     this.createdAt,
     this.updatedAt,
@@ -39,6 +41,7 @@ class UserEntity extends Equatable {
     photoUrl,
     kelasWali,
     mataPelajaran,
+    jamMengajar,
     santriIds,
     createdAt,
     updatedAt,
@@ -52,6 +55,7 @@ class UserEntity extends Equatable {
     String? photoUrl,
     String? kelasWali,
     List<String>? mataPelajaran,
+    String? jamMengajar,
     List<String>? santriIds,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -64,6 +68,7 @@ class UserEntity extends Equatable {
       photoUrl: photoUrl ?? this.photoUrl,
       kelasWali: kelasWali ?? this.kelasWali,
       mataPelajaran: mataPelajaran ?? this.mataPelajaran,
+      jamMengajar: jamMengajar ?? this.jamMengajar,
       santriIds: santriIds ?? this.santriIds,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

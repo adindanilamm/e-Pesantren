@@ -10,6 +10,7 @@ class UserModel extends UserEntity {
     super.photoUrl,
     super.kelasWali,
     super.mataPelajaran,
+    super.jamMengajar,
     super.santriIds,
     super.createdAt,
     super.updatedAt,
@@ -26,6 +27,7 @@ class UserModel extends UserEntity {
       mataPelajaran: json['mataPelajaran'] != null
           ? List<String>.from(json['mataPelajaran'])
           : null,
+      jamMengajar: json['jamMengajar'],
       santriIds: json['santriIds'] != null
           ? List<String>.from(json['santriIds'])
           : null,
@@ -52,6 +54,7 @@ class UserModel extends UserEntity {
           : (data['subjects'] != null
                 ? List<String>.from(data['subjects'])
                 : null),
+      jamMengajar: data['jamMengajar'],
       santriIds: data['santriIds'] != null
           ? List<String>.from(data['santriIds'])
           : (data['santriId'] != null
@@ -73,6 +76,7 @@ class UserModel extends UserEntity {
     if (photoUrl != null) json['photoUrl'] = photoUrl!;
     if (kelasWali != null) json['kelasWali'] = kelasWali!;
     if (mataPelajaran != null) json['mataPelajaran'] = mataPelajaran!;
+    if (jamMengajar != null) json['jamMengajar'] = jamMengajar!;
     if (santriIds != null) json['santriIds'] = santriIds!;
     if (createdAt != null) json['createdAt'] = Timestamp.fromDate(createdAt!);
     if (updatedAt != null) json['updatedAt'] = Timestamp.fromDate(updatedAt!);
@@ -94,6 +98,7 @@ class UserModel extends UserEntity {
     if (photoUrl != null) data['photoUrl'] = photoUrl!;
     if (kelasWali != null) data['kelasWali'] = kelasWali!;
     if (mataPelajaran != null) data['mataPelajaran'] = mataPelajaran!;
+    if (jamMengajar != null) data['jamMengajar'] = jamMengajar!;
     if (santriIds != null) data['santriIds'] = santriIds!;
 
     return data;
@@ -108,6 +113,7 @@ class UserModel extends UserEntity {
       photoUrl: entity.photoUrl,
       kelasWali: entity.kelasWali,
       mataPelajaran: entity.mataPelajaran,
+      jamMengajar: entity.jamMengajar,
       santriIds: entity.santriIds,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,

@@ -652,6 +652,10 @@ class _CreateUstadzFormState extends State<CreateUstadzForm> {
   bool _isWaliKelas = false;
   String? _selectedWaliKelasKamar;
 
+  // Jam Mengajar
+  TimeOfDay? _jamMulai;
+  TimeOfDay? _jamSelesai;
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -659,6 +663,35 @@ class _CreateUstadzFormState extends State<CreateUstadzForm> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  String? _getFormattedJamMengajar() {
+    if (_jamMulai != null && _jamSelesai != null) {
+      final start =
+          '${_jamMulai!.hour.toString().padLeft(2, '0')}:${_jamMulai!.minute.toString().padLeft(2, '0')}';
+      final end =
+          '${_jamSelesai!.hour.toString().padLeft(2, '0')}:${_jamSelesai!.minute.toString().padLeft(2, '0')}';
+      return '$start-$end';
+    }
+    return null;
+  }
+
+  Future<void> _pickTime(bool isStart) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: isStart
+          ? (_jamMulai ?? const TimeOfDay(hour: 9, minute: 0))
+          : (_jamSelesai ?? const TimeOfDay(hour: 15, minute: 0)),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _jamMulai = picked;
+        } else {
+          _jamSelesai = picked;
+        }
+      });
+    }
   }
 
   Future<void> _createUstadzAccount() async {
@@ -728,6 +761,7 @@ class _CreateUstadzFormState extends State<CreateUstadzForm> {
               'role': 'ustadz',
               'subjects': subjects,
               'mataPelajaran': subjects,
+              'jamMengajar': _getFormattedJamMengajar(),
               'isWaliKelas': _isWaliKelas,
               'waliKelasKamar': _isWaliKelas ? _selectedWaliKelasKamar : null,
               'createdAt': FieldValue.serverTimestamp(),
@@ -764,6 +798,8 @@ class _CreateUstadzFormState extends State<CreateUstadzForm> {
         setState(() {
           _isWaliKelas = false;
           _selectedWaliKelasKamar = null;
+          _jamMulai = null;
+          _jamSelesai = null;
         });
       }
     } on FirebaseAuthException catch (e) {
@@ -908,6 +944,135 @@ class _CreateUstadzFormState extends State<CreateUstadzForm> {
                 }
                 return null;
               },
+            ),
+            const SizedBox(height: 16),
+
+            // Jam Mengajar - Time Picker
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.schedule, color: Color(0xFF8B5CF6), size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'Jam Mengajar',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1E293B),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _pickTime(true),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 16,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.access_time,
+                                  size: 18,
+                                  color: Color(0xFF64748B),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _jamMulai != null
+                                      ? '${_jamMulai!.hour.toString().padLeft(2, '0')}:${_jamMulai!.minute.toString().padLeft(2, '0')}'
+                                      : 'Mulai',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: _jamMulai != null
+                                        ? const Color(0xFF1E293B)
+                                        : const Color(0xFF94A3B8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          '-',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _pickTime(false),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 16,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.access_time,
+                                  size: 18,
+                                  color: Color(0xFF64748B),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _jamSelesai != null
+                                      ? '${_jamSelesai!.hour.toString().padLeft(2, '0')}:${_jamSelesai!.minute.toString().padLeft(2, '0')}'
+                                      : 'Selesai',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: _jamSelesai != null
+                                        ? const Color(0xFF1E293B)
+                                        : const Color(0xFF94A3B8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 20),
 
