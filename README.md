@@ -18,7 +18,7 @@
 
 **SPASANTREN** adalah aplikasi mobile berbasis Flutter yang dirancang untuk memudahkan pengelolaan penilaian akademik di lingkungan pesantren. Aplikasi ini memungkinkan:
 
-- 👨‍💼 **Admin** untuk mengelola data santri, ustadz, dan wali santri
+- 👨‍💼 **Admin** untuk mengelola data santri, ustadz, wali santri, dan akun admin lainnya
 - 👨‍🏫 **Ustadz** untuk menginput nilai berdasarkan mata pelajaran yang diampu
 - 👨‍👩‍👦 **Wali Santri** untuk memantau perkembangan akademik putra/putri mereka
 
@@ -29,13 +29,21 @@
 ### 🔐 Multi-Role Authentication
 | Role | Kemampuan |
 |------|-----------|
-| **Admin** | Kelola santri, ustadz, wali • CRUD pengguna • Lihat semua data |
-| **Ustadz** | Input nilai sesuai mapel yang diampu • Lihat daftar santri |
+| **Admin** | Kelola santri, ustadz, wali • CRUD pengguna • Tambah admin baru • Kelola Wali Kelas |
+| **Ustadz** | Input nilai sesuai mapel yang diampu • Lihat statistik mengajar dinamis |
 | **Wali Santri** | Lihat nilai anak • Download rapor PDF |
+
+### 🛡️ Keamanan Login
+- **CAPTCHA Simulasi** - Verifikasi "I'm not a robot" sebelum login
+
+### 👨‍🏫 Fitur Wali Kelas
+- Ustadz dapat ditugaskan sebagai **Wali Kelas** untuk kamar tertentu
+- Saat menambah Santri, pilihan Wali Kelas otomatis mengisi field Kamar
+- Admin dapat melihat daftar santri yang diwalikan oleh setiap Ustadz
 
 ### 📊 Modul Penilaian
 - **Tahfidz** - Penilaian hafalan Al-Qur'an (Surah, Juz, Nilai)
-- **Mata Pelajaran** - Fiqih, Hadis, Bahasa Arab
+- **Mata Pelajaran** - Fiqih, Hadis, Bahasa Arab, Akhlak
 - **Akhlak** - Kejujuran, Kedisiplinan, Kebersihan, Sopan Santun
 - **Kehadiran** - Tracking kehadiran harian dengan rekap otomatis
 
@@ -44,6 +52,7 @@
 - 📄 Export Rapor ke PDF
 - 🔄 Real-time sync dengan Firebase
 - 📊 Visualisasi data dengan Pie Chart
+- ⏰ Time Picker untuk input jam mengajar (tanpa ketik manual)
 
 ---
 
@@ -92,11 +101,16 @@ lib/
 📦 Firestore
 ├── 📁 users/              # All user accounts
 │   ├── uid, name, email, role
-│   └── mataPelajaran[]    # For Ustadz
-│   └── santriIds[]        # For Wali
+│   ├── mataPelajaran[]    # For Ustadz (array of subjects)
+│   ├── jamMengajar        # For Ustadz (e.g., "09:00-15:00")
+│   ├── isWaliKelas        # Boolean
+│   ├── waliKelasKamar     # Kamar yang diwalikan
+│   └── santriIds[]        # For Wali Santri
 │
 ├── 📁 santri/             # Student data
-│   └── id, nis, nama, kamar, angkatan
+│   ├── id, nis, nama, kamar, angkatan
+│   ├── waliKelasId        # Link to Ustadz
+│   └── waliKelasName
 │
 ├── 📁 penilaian_tahfidz/  # Tahfidz grades
 ├── 📁 penilaian_mapel/    # Subject grades
@@ -163,25 +177,29 @@ flutter test
 Email: admin@pesantren.id
 Password: [sesuai yang dibuat]
 ```
-- ✅ Tambah data Santri
-- ✅ Buat akun Ustadz dengan mapel tertentu (misal: Tahfidz saja)
+- ✅ Tambah data Santri (dengan pilihan Wali Kelas)
+- ✅ Buat akun Ustadz dengan mapel dan jam mengajar (via Time Picker)
 - ✅ Buat akun Wali Santri dan link ke NIS santri
+- ✅ Buat akun Admin baru (via menu Profil)
 - ✅ Edit/Hapus pengguna di menu "Pengguna"
+- ✅ Verifikasi CAPTCHA saat login
 
 #### 2️⃣ Login sebagai Ustadz
 ```
 Email: ustadz@pesantren.id
 ```
-- ✅ Pilih santri dari daftar
-- ✅ Input nilai sesuai mapel yang diampu
-- ✅ Verifikasi hanya tab mapel yang relevan muncul
+- ✅ Lihat statistik mengajar dinamis:
+  - Total Kelas = jumlah mata pelajaran yang diampu
+  - Total Santri = jumlah santri dari Firestore
+  - Jam Mengajar = dari data profil
+- ✅ Pilih santri dan input nilai
 
 #### 3️⃣ Login sebagai Wali Santri
 ```
 Email: wali@pesantren.id
 ```
 - ✅ Lihat profil anak
-- ✅ Lihat nilai yang sudah diinput (hanya yang ada datanya)
+- ✅ Lihat nilai yang sudah diinput
 - ✅ Export rapor PDF
 
 ---
@@ -190,18 +208,18 @@ Email: wali@pesantren.id
 
 ### Asumsi Bisnis
 1. **Satu Wali = Satu atau Lebih Santri** - Wali bisa memiliki beberapa anak
-2. **Mata Pelajaran Tetap** - Tahfidz, Fiqih, Hadis, Bahasa Arab (dapat diperluas)
+2. **Mata Pelajaran Tetap** - Tahfidz, Fiqih, Hadis, Akhlak, Bahasa Arab
 3. **Penilaian Akhlak** - Menggunakan skala 1-4 (Kurang-Sangat Baik)
-4. **Semester/Tahun Ajaran** - Saat ini hardcode "2024/2025"
+4. **Wali Kelas** - Ustadz dapat ditugaskan sebagai wali untuk satu kamar
 
 ### Catatan Teknis
-1. **Delete User** - Hanya menghapus dari Firestore, tidak dari Firebase Auth (membutuhkan Admin SDK/Cloud Function)
+1. **Secondary App Pattern** - Digunakan saat Admin membuat akun baru agar tidak ter-logout
 2. **Offline Mode** - Tidak didukung secara penuh, membutuhkan koneksi internet
-3. **Role-Based Access** - Dihandle di app level, bukan Firestore Rules (production harus ditambahkan)
+3. **Role-Based Access** - Dihandle di app level
 
 ### Known Limitations
 - `withOpacity` deprecation warnings (Flutter 3.27+) - cosmetic only
-- PDF export membutuhkan font default (tidak support custom font)
+- PDF export membutuhkan font default
 
 ---
 
@@ -211,27 +229,19 @@ Email: wali@pesantren.id
 |------|-----------|
 | `lib/main.dart` | Entry point dengan routing berdasarkan role |
 | `lib/presentation/screens/admin/admin_dashboard.dart` | Dashboard Admin dengan navigasi |
-| `lib/presentation/screens/ustadz/input_penilaian_screen.dart` | Input nilai dengan dynamic tabs |
+| `lib/presentation/screens/admin/create_user_screen.dart` | Form buat Ustadz/Wali dengan Time Picker |
+| `lib/presentation/screens/admin/add_santri_screen.dart` | Form tambah santri dengan pilihan Wali Kelas |
+| `lib/presentation/screens/ustadz/ustadz_dashboard.dart` | Dashboard Ustadz dengan statistik dinamis |
 | `lib/presentation/screens/wali/rapor_screen.dart` | Rapor dengan nilai dinamis |
-| `lib/data/models/user_model.dart` | Model user dengan fallback compatibiliy |
-
----
-
-## 🎨 Screenshots
-
-<div align="center">
-
-| Admin Dashboard | User Management | Wali Rapor |
-|:---:|:---:|:---:|
-| Data Santri | Kelola Ustadz/Wali | Lihat Nilai |
-
-</div>
+| `lib/presentation/screens/login_screen.dart` | Login dengan CAPTCHA simulasi |
+| `lib/data/models/user_model.dart` | Model user dengan jamMengajar |
+| `lib/presentation/providers/nav_provider.dart` | State navigasi bersama |
 
 ---
 
 ## 👥 Kontributor
 
-- **Developer** - UAS PEMROGRAMAN MOBILE NGETES DARI GEMINI
+- **Developer** - UAS PEMROGRAMAN MOBILE
 
 ---
 
